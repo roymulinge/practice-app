@@ -17,13 +17,19 @@ export default function Navbar({ user }) {
           DEST HIGH INTL
         </Link>
 
+        <Link to="/student-login" className="hover:text-gray-300" >
+          Student Login
+        </Link>
+
         <div className="space-x-4">
           <Link to="/" className="hover:text-gray-300">Home</Link>
           <Link to="/student-portal" className="hover:text-gray-300">Student Portal</Link>
           
           {user ? (
             <>
-              <Link to="/dashboard" className="hover:text-gray-300">Dashboard</Link>
+                {user && localStorage.getItem("role") === "admin" && (
+                <Link to="/dashboard">Dashboard</Link>
+                )}
               <button 
                 onClick={handleLogout} 
                 className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm ml-4"

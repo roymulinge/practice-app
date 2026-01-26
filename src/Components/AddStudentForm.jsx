@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
-
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
-function AddStudent(onStudentAdded) {
-
+function AddStudent() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [admission, setAdmission] = useState("");
@@ -16,40 +13,35 @@ function AddStudent(onStudentAdded) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setMessage("");
     setLoading(true);
-
-    const userCredential = await createUserWithEmailAndPassword(
-     auth,
-     email,
-     "student123" // force change later
-);
-
-    const uid = userCredential.user.uid;
-
+    setMessage("");
 
     try {
-      await addDoc(collection(db, "students"), {
-        uid,
+      const cred = await createUserWithEmailAndPassword(
+        auth,
         email,
+        "student123"
+      );
+
+      const studentUid = cred.user.uid;
+
+      await addDoc(collection(db, "students"), {
+        uid: studentUid,          // 🔑 REQUIRED
         name,
+        email,
         admission,
         className,
         createdAt: serverTimestamp(),
       });
 
-      onStudentAdded();
-
-      // ✅ SUCCESS FEEDBACK
       setMessage("✅ Student added successfully");
-
-      // ✅ CLEAR INPUTS
+      setEmail("");
       setName("");
       setAdmission("");
       setClassName("");
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
       setMessage("❌ Failed to add student");
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -67,6 +59,15 @@ function AddStudent(onStudentAdded) {
           className="w-full border p-2 rounded"
           required
         />
+
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Student Email"
+          className="w-full border p-2 rounded"
+          required
+        />
+
 
         <input
           value={admission}
