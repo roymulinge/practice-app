@@ -15,7 +15,7 @@ function StudentLogin() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/student-dashboard");
+      navigate("/student-portal");
     } catch {
       setError("Invalid credentials");
     }

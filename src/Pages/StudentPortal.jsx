@@ -13,21 +13,18 @@ export default function StudentPortal() {
   const [user, setUser] = useState(null);
   
   useEffect(() => {
-  const unsub = onAuthStateChanged(auth, (currentUser) => {
-    if (!currentUser) {
-      setError("Please login to access the student portal.");
-    } else {
-      setUser(currentUser);
-    }
-    });
+  setUser(auth.currentUser);
+ }, []);
 
-     return () => unsub();
-    }, []);
 
   if (!user) {
-  setError("You must be logged in to view your details.");
-  return;
-}
+  return (
+      <p className="min-h-screen flex items-center justify-center text-red-600">
+        Please login to access the student portal.
+      </p>
+     );
+    }
+
 
 
   const handleSearch = async (e) => {

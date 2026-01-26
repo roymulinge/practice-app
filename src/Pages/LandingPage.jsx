@@ -17,7 +17,7 @@ export default function LandingPage() {
           Admin Login
         </button>
         <button
-          onClick={() => navigate("/student-portal")}
+          onClick={() => navigate("/student-login")}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-lg shadow-lg"
         >
           Check Student Details

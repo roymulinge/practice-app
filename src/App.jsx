@@ -8,7 +8,7 @@ import Login from "./Pages/Login";
 import AdminDashboard from "./Components/AdminDashboard";
 import StudentPortal from "./Pages/StudentPortal";
 import Navbar from "./Components/Navbar"; // Import the new Navbar
-
+import StudentLogin from "./Pages/StudentLogin";
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,9 +30,10 @@ function App() {
       
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/student-portal" element={<StudentPortal />} />
+        <Route path="/student-portal" element={user ? <StudentPortal /> : <Navigate to="/student-login" />}/>
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={user ? <AdminDashboard /> : <Navigate to="/login" />} />
+        <Route path="/student-login" element={!user ? <StudentLogin /> : <Navigate to="/student-portal" />} />
       </Routes>
     </Router>
   );
