@@ -1,12 +1,34 @@
 import { useState } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
+import { useEffect } from "react";
+import { auth } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function StudentPortal() {
   const [admissionInput, setAdmissionInput] = useState("");
   const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+  const unsub = onAuthStateChanged(auth, (currentUser) => {
+    if (!currentUser) {
+      setError("Please login to access the student portal.");
+    } else {
+      setUser(currentUser);
+    }
+    });
+
+     return () => unsub();
+    }, []);
+
+  if (!user) {
+  setError("You must be logged in to view your details.");
+  return;
+}
+
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -16,7 +38,7 @@ export default function StudentPortal() {
 
     try {
      
-      const q = query(collection(db, "students"), where("name", "==", admissionInput));
+      const q = query(collection(db, "students"), where("uid", "==", user.uid));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
