@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -17,149 +17,144 @@ function AddStudent() {
     setMessage("");
 
     try {
-      // 1. Create student in Authentication
-      const cred = await createUserWithEmailAndPassword(
+      console.log("Step 1: Creating student in Authentication...");
+      
+      // Create the student account
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        "student123" // Default password
+        "student123"
       );
 
-      const studentUid = cred.user.uid;
-
-      // 2. Add student to Firestore
-      // ⚠️ CRITICAL: We're already signed in as the new student!
-      // This will work because your Firestore rules allow any authenticated user
+      console.log("Student created with UID:", userCredential.user.uid);
+      
+      // At this point, we're signed in as the student
+      // So we can write to Firestore if rules allow authenticated users
+      console.log("Step 2: Adding to Firestore...");
+      
       await addDoc(collection(db, "students"), {
-        uid: studentUid,
-        name,
-        email,
-        admission,
-        className,
+        uid: userCredential.user.uid,
+        name: name,
+        email: email,
+        admission: admission,
+        className: className,
         createdAt: serverTimestamp(),
-        addedAt: new Date().toISOString(), // Add timestamp
       });
 
-      setMessage("✅ Student added successfully");
+      console.log("Step 3: Success!");
+      setMessage("✅ Student added successfully!");
+      
+      // Clear form
       setEmail("");
       setName("");
       setAdmission("");
       setClassName("");
+
+    } catch (error) {
+      console.error("Full error details:", error);
       
-    } catch (err) {
-      console.error("Full error:", err);
-      
-      // Detailed error messages
-      if (err.code === 'auth/email-already-in-use') {
-        setMessage('❌ This email is already registered');
-      } else if (err.code === 'auth/invalid-email') {
-        setMessage('❌ Invalid email format (e.g., student@school.com)');
-      } else if (err.code === 'auth/weak-password') {
-        setMessage('❌ Password is too weak');
-      } else if (err.code === 'permission-denied') {
-        setMessage('❌ Firestore permission denied. Check console for details.');
-      } else if (err.code === 'auth/operation-not-allowed') {
-        setMessage('❌ Email/password sign-in not enabled. Check Firebase Console → Authentication → Sign-in methods');
+      // Better error messages
+      if (error.code === 'auth/email-already-in-use') {
+        setMessage('❌ This email is already registered. Please use a different email.');
+      } else if (error.code === 'auth/invalid-email') {
+        setMessage('❌ Invalid email address format.');
+      } else if (error.code === 'permission-denied') {
+        setMessage('❌ Firestore permission denied. Please update your Firestore rules to allow writes.');
+      } else if (error.message.includes('permissions')) {
+        setMessage('❌ Permission error. Check Firestore rules in Firebase Console.');
       } else {
-        setMessage(`❌ Error: ${err.message}`);
+        setMessage(`❌ Error: ${error.message}`);
       }
     } finally {
       setLoading(false);
     }
   }
 
-  // Test Firestore connection
-  async function testConnection() {
-    try {
-      const testDoc = await addDoc(collection(db, "test"), {
-        test: "Testing connection",
-        timestamp: serverTimestamp()
-      });
-      console.log("Test successful! Document ID:", testDoc.id);
-      setMessage("✅ Firestore connection is working!");
-    } catch (err) {
-      console.error("Firestore test error:", err);
-      setMessage(`❌ Firestore error: ${err.message}`);
-    }
-  }
-
   return (
-    <div className="bg-white p-6 rounded shadow max-w-md">
-      <h2 className="text-xl font-bold mb-4">Add Student</h2>
+    <div className="bg-white p-6 rounded shadow max-w-md mx-auto mt-8">
+      <h2 className="text-2xl font-bold mb-6 text-center">Add New Student</h2>
       
-      {/* Test button */}
-      <button 
-        onClick={testConnection}
-        className="mb-4 bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Test Firestore Connection
-      </button>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Full Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g., John Doe"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Student Name (e.g., John Doe)"
-          className="w-full border p-2 rounded"
-          required
-          disabled={loading}
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Email Address</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="e.g., student@school.edu"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Student Email (e.g., student@school.com)"
-          className="w-full border p-2 rounded"
-          required
-          disabled={loading}
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Admission Number</label>
+          <input
+            type="text"
+            value={admission}
+            onChange={(e) => setAdmission(e.target.value)}
+            placeholder="e.g., ADM2024001"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-        <input
-          value={admission}
-          onChange={(e) => setAdmission(e.target.value)}
-          placeholder="Admission Number (e.g., ADM001)"
-          className="w-full border p-2 rounded"
-          required
-          disabled={loading}
-        />
-
-        <input
-          value={className}
-          onChange={(e) => setClassName(e.target.value)}
-          placeholder="Class (e.g., Class 10A)"
-          className="w-full border p-2 rounded"
-          required
-          disabled={loading}
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Class</label>
+          <input
+            type="text"
+            value={className}
+            onChange={(e) => setClassName(e.target.value)}
+            placeholder="e.g., Class 10A"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
         <button
-          disabled={loading}
-          className="bg-green-600 text-white px-4 py-2 rounded w-full disabled:opacity-50"
           type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Adding Student..." : "Add Student"}
         </button>
       </form>
 
       {message && (
-        <div className={`mt-4 p-3 rounded text-center ${
+        <div className={`mt-6 p-4 rounded-lg text-center ${
           message.includes('✅') 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
+            ? 'bg-green-50 text-green-800 border border-green-200' 
+            : 'bg-red-50 text-red-800 border border-red-200'
         }`}>
-          {message}
+          <p className="font-medium">{message}</p>
+          {message.includes('permission') && (
+            <p className="text-sm mt-2">
+              Go to Firebase Console → Firestore → Rules → Update to allow writes
+            </p>
+          )}
         </div>
       )}
-      
-      <div className="mt-4 text-sm text-gray-600">
-        <p><strong>Note:</strong> The student will be created with password: <code>student123</code></p>
-        <p className="mt-2"><strong>Example:</strong></p>
-        <ul className="list-disc pl-5 mt-1">
-          <li>Name: John Smith</li>
-          <li>Email: john.smith@school.com</li>
-          <li>Admission: ADM2024001</li>
-          <li>Class: Grade 10 Science</li>
-        </ul>
+
+      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <h3 className="font-medium mb-2">Test with this data:</h3>
+        <div className="text-sm space-y-1">
+          <p><span className="font-medium">Name:</span> Test Student</p>
+          <p><span className="font-medium">Email:</span> teststudent{Date.now()}@test.com</p>
+          <p><span className="font-medium">Admission:</span> TEST{Date.now().toString().slice(-4)}</p>
+          <p><span className="font-medium">Class:</span> Test Class</p>
+        </div>
       </div>
     </div>
   );
