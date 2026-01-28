@@ -4,7 +4,7 @@ import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 import LandingPage from "./Pages/LandingPage";
-import Login from "./Pages/Login"; // Admin login
+import AdminLogin from "./Pages/AdminLogin";
 import AdminDashboard from "./Components/AdminDashboard";
 import StudentPortal from "./Pages/StudentPortal";
 import Navbar from "./Components/Navbar";
@@ -14,81 +14,47 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Listen to auth state
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
-    return () => unsub();
+    return unsubscribe;
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
-      <p className="min-h-screen flex items-center justify-center">
-        Loading...
-      </p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-gray-600">Loading...</div>
+      </div>
     );
+  }
 
-  const role = localStorage.getItem("role"); // "admin" or "student"
+  const role = localStorage.getItem("role");
 
   return (
     <Router>
       <Navbar user={user} />
-
       <Routes>
         <Route path="/" element={<LandingPage />} />
-
-        {/* Admin login */}
-        <Route
-          path="/login"
-          element={
-            !user || role !== "admin" ? (
-              <Login />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-
-        {/* Admin dashboard */}
-        <Route
-          path="/admin-dashboard"
-          element={
-            user && role === "admin" ? (
-              <AdminDashboard />
-            ) : (
-              <Navigate to="/admin-login" />
-            )
-          }
-        />
-
-        {/* Student login */}
-        <Route
-          path="/student-login"
-          element={
-            !user || role !== "student" ? (
-              <StudentLogin />
-            ) : (
-              <Navigate to="/student-portal" />
-            )
-          }
-        />
-
-        {/* Student portal */}
-        <Route
-          path="/student-portal"
-          element={
-            user && role === "student" ? (
-              <StudentPortal />
-            ) : (
-              <Navigate to="/student-login" />
-            )
-          }
-        />
-
-        {/* Fallback for all unknown routes */}
-        <Route path="*" element={<p>Page not found</p>} />
+        
+        <Route path="/admin-login" element={
+          !user || role !== "admin" ? <AdminLogin /> : <Navigate to="/admin-dashboard" />
+        } />
+        
+        <Route path="/admin-dashboard" element={
+          user && role === "admin" ? <AdminDashboard /> : <Navigate to="/admin-login" />
+        } />
+        
+        <Route path="/student-login" element={
+          !user || role !== "student" ? <StudentLogin /> : <Navigate to="/student-portal" />
+        } />
+        
+        <Route path="/student-portal" element={
+          user && role === "student" ? <StudentPortal /> : <Navigate to="/student-login" />
+        } />
+        
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

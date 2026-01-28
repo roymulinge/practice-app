@@ -1,74 +1,102 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
 
 function StudentLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
- async function handleLogin(e) {
-  e.preventDefault();
-  setError("");
+  async function handleLogin(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    const uid = cred.user.uid;
+    try {
+      const credentials = await signInWithEmailAndPassword(auth, email, password);
+      const uid = credentials.user.uid;
 
-    const snap = await getDoc(doc(db, "users", uid));
+      const userDoc = await getDoc(doc(db, "users", uid));
 
-    if (!snap.exists() || snap.data().role !== "student") {
-      await auth.signOut();
-      setError("Not a student account");
-      return;
+      if (!userDoc.exists() || userDoc.data().role !== "student") {
+        await auth.signOut();
+        setError("Student account not found.");
+        return;
+      }
+
+      localStorage.setItem("role", "student");
+      localStorage.setItem("studentEmail", email);
+      navigate("/student-portal");
+    } catch (error) {
+      if (error.code === "auth/user-not-found") {
+        setError("No student account found.");
+      } else if (error.code === "auth/wrong-password") {
+        setError("Incorrect password.");
+      } else {
+        setError("Unable to login. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem("role", "student");
-    navigate("/student-portal");
-  } catch {
-    setError("Invalid credentials");
   }
-}
-
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-50">
-        <form
-            onSubmit={handleLogin}
-            className="bg-white p-6 rounded shadow-md w-full max-w-sm space-y-4"
-        >
-            <h2 className="text-2xl font-bold text-center text-blue-800">
-            Student Login
-            </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center text-blue-800 mb-2">
+          Student Login
+        </h2>
+        <p className="text-gray-600 text-center mb-6">Access your portal</p>
 
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label className="block text-gray-700 mb-2">Student Email</label>
             <input
-            type="email"
-            placeholder="Student Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full border p-2 rounded"
-            required
+              type="email"
+              placeholder="student@desthigh.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
+          </div>
 
+          <div>
+            <label className="block text-gray-700 mb-2">Password</label>
             <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="w-full border p-2 rounded"
-            required
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
+          </div>
 
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold">
-            Login
-            </button>
-
-            {error && <p className="text-red-500 text-center">{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50"
+          >
+            {loading ? "Logging in..." : "Login to Student Portal"}
+          </button>
         </form>
-    </div>
 
+        {error && (
+          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-center">{error}</p>
+          </div>
+        )}
+
+        <div className="mt-8 text-center text-sm text-gray-500">
+          <p>Use your school-provided credentials</p>
+        </div>
+      </div>
+    </div>
   );
 }
 

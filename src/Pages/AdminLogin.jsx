@@ -2,7 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore"; // ADD setDoc
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -17,30 +17,51 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      // 1. Sign in with Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
+      const userEmail = userCredential.user.email;
 
-      // Optional: check 'users' collection for role
-      const userDoc = await getDoc(doc(db, "users", uid));
+      // 2. Check or create user document
+      const userDocRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userDocRef);
 
-      // Admin check
-      if (!userDoc.exists() || userDoc.data().role !== "admin") {
-        setError("Access denied. You are not an admin.");
-        await auth.signOut();
-        return;
+      if (!userDoc.exists()) {
+        // Create admin document if it doesn't exist
+        await setDoc(userDocRef, {
+          email: userEmail,
+          role: "admin",
+          name: "Administrator",
+          createdAt: new Date()
+        });
+      } else {
+        // Check if already has admin role
+        if (userDoc.data().role !== "admin") {
+          setError("Admin access required.");
+          await auth.signOut();
+          return;
+        }
       }
 
+      // 3. Success - set localStorage and navigate
       localStorage.setItem("role", "admin");
-      navigate("/dashboard"); // go to dashboard
+      localStorage.setItem("adminEmail", userEmail);
+      navigate("/admin-dashboard");
+      
     } catch (err) {
-      if (err.code === "auth/user-not-found") setError("User not found.");
-      else if (err.code === "auth/wrong-password") setError("Wrong password.");
-      else setError("Login failed: " + err.message);
+      if (err.code === "auth/user-not-found") {
+        setError("No admin account found.");
+      } else if (err.code === "auth/wrong-password") {
+        setError("Incorrect password.");
+      } else {
+        setError("Login failed: " + err.message);
+      }
     } finally {
       setLoading(false);
     }
   }
 
+  // Rest of your component remains the same...
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded shadow">
