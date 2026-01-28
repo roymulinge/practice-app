@@ -467,23 +467,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">Generate Reports</h2>
-                  <div className="space-y-4">
-                    <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all">
-                      📄 Generate Fee Statement Report
-                    </button>
-                    <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all">
-                      💰 Outstanding Payments Report
-                    </button>
-                    <button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all">
-                      📊 Student Performance Report
-                    </button>
-                    <button className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all">
-                      📧 Send Mass Notifications
-                    </button>
-                  </div>
-                </div>
+                
               </div>
             </div>
           </div>
