@@ -11,7 +11,7 @@ function StudentSignup() {
     password: "",
     confirmPassword: "",
     studentId: "",
-    gradeLevel: "",
+    className: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,7 @@ function StudentSignup() {
       setError("Student ID is required");
       return false;
     }
-    if (!formData.gradeLevel) {
+    if (!formData.className) {
       setError("Please select your grade level");
       return false;
     }
@@ -92,7 +92,7 @@ function StudentSignup() {
         lastName: formData.lastName,
         email: formData.email,
         studentId: formData.studentId,
-        gradeLevel: formData.gradeLevel,
+        className: formData.className,
         role: "student",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -102,8 +102,7 @@ function StudentSignup() {
 
       await setDoc(doc(db, "users", uid), userData);
 
-      // Optional: Send email verification
-      // await sendEmailVerification(credentials.user);
+    
 
       setSuccess(true);
       
@@ -220,19 +219,19 @@ function StudentSignup() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Grade Level *
+                  Class/Form *
                 </label>
                 <select
-                  name="gradeLevel"
-                  value={formData.gradeLevel}
+                  name="className"
+                  value={formData.className}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
-                  <option value="">Select Grade Level</option>
-                  {gradeLevels.map((grade) => (
-                    <option key={grade} value={grade}>
-                      {grade}
+                  <option value="">Select Class</option>
+                  {classOptions.map((classOption) => (
+                    <option key={classOption} value={classOption}>
+                      {classOption}
                     </option>
                   ))}
                 </select>
