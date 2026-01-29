@@ -31,6 +31,25 @@ export default function Navbar({ user }) {
     };
   }, []);
 
+   // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        authDropdownRef.current && 
+        !authDropdownRef.current.contains(event.target) &&
+        authButtonRef.current && 
+        !authButtonRef.current.contains(event.target)
+      ) {
+        setIsAuthDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
    // Close dropdown on Escape key
   useEffect(() => {
     const handleEscape = (event) => {
@@ -49,6 +68,17 @@ export default function Navbar({ user }) {
     setIsAuthDropdownOpen(!isAuthDropdownOpen);
   };
 
+  const handleAuthAction = (action) => {
+    setIsAuthDropdownOpen(false);
+    if (action === 'student-login') {
+      navigate('/student-login');
+    } else if (action === 'admin-login') {
+      navigate('/admin-login');
+    } else if (action === 'student-signup') {
+      navigate('/student-signup'); // You'll need to create this route
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -62,7 +92,7 @@ export default function Navbar({ user }) {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-xl mt-0">
+    <nav className="bg-gradient-to-r from-blue-900         to-indigo-900 text-white shadow-xl mt-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
@@ -83,7 +113,7 @@ export default function Navbar({ user }) {
               <Link to="/admin-dashboard" className="hover:text-blue-200 transition-colors">Dashboard</Link>
             )}
             
-            <Link to="/student-login" className="hover:text-blue-200 transition-colors">Student Login</Link>
+            
           </div>
 
           <div className="flex items-center space-x-4">
@@ -100,6 +130,7 @@ export default function Navbar({ user }) {
                 </button>
               </>
             ) : (
+            <div className="relative" ref={authDropdownRef}>
               <button
                 ref={authButtonRef}
                  
@@ -123,6 +154,74 @@ export default function Navbar({ user }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
               </button>
+
+              {/* Dropdown Menu */}
+                {isAuthDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl overflow-hidden z-50 border border-gray-200">
+                    <div className="p-4 border-b border-gray-100">
+                      <h3 className="font-bold text-gray-800">Welcome to DEST HIGH</h3>
+                      <p className="text-sm text-gray-600 mt-1">Choose your login option</p>
+                    </div>
+                    
+                    <div className="p-2">
+                      <button
+                        onClick={() => handleAuthAction('student-login')}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition-colors text-left group"
+                      >
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">Student Login</div>
+                          <div className="text-xs text-gray-500">Access your student portal</div>
+                        </div>
+                        <span className="text-gray-400 group-hover:text-blue-600 transition-colors">→</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleAuthAction('admin-login')}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50 transition-colors text-left group mt-2"
+                      >
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">Admin Login</div>
+                          <div className="text-xs text-gray-500">Access admin dashboard</div>
+                        </div>
+                        <span className="text-gray-400 group-hover:text-purple-600 transition-colors">→</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleAuthAction('student-signup')}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 transition-colors text-left group mt-2"
+                      >
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">Student Sign up</div>
+                          <div className="text-xs text-gray-500">Create new student account</div>
+                        </div>
+                        <span className="text-gray-400 group-hover:text-green-600 transition-colors">→</span>
+                      </button>
+                    </div>
+
+              <div className="p-3 bg-gray-50 border-t border-gray-100">
+                      <p className="text-xs text-center text-gray-600">
+                        Need help? <a href="/contact" className="text-blue-600 hover:underline">Contact support</a>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
               
             )}
           </div>
