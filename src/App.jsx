@@ -9,7 +9,7 @@ import AdminDashboard from "./Components/AdminDashboard";
 import StudentPortal from "./Pages/StudentPortal";
 import Navbar from "./Components/Navbar";
 import StudentLogin from "./Pages/StudentLogin";
-
+import StudentSignup from "./Pages/StudentSignup";
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,6 +48,10 @@ function App() {
        
         <Route path="/student-login" element={
           !user || role !== "student" ? <StudentLogin /> : <Navigate to="/student-portal" />
+        } />
+
+        <Route path="/student-signup" element={
+          !user || role !== "student" ? <StudentSignup /> : <Navigate to="/student-portal" />
         } />
         
         <Route path="/student-portal" element={
