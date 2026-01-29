@@ -2,6 +2,7 @@ import {useState} from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 function StudentSignup() {
     const [formData, setFormData] = useState({
     firstName: "",
@@ -18,6 +19,18 @@ function StudentSignup() {
   
   const navigate = useNavigate();
 
+     // Forms system for Kenyan schools
+    const classOptions = [
+        "Form 1A", "Form 1B", "Form 1C", "Form 1D",
+        "Form 2A", "Form 2B", "Form 2C", "Form 2D",
+        "Form 3A", "Form 3B", "Form 3C", "Form 3D",
+        "Form 4A", "Form 4B", "Form 4C", "Form 4D",
+        "Grade 9A", "Grade 9B", "Grade 9C",
+        "Grade 10A", "Grade 10B", "Grade 10C",
+        "Grade 11A", "Grade 11B", "Grade 11C",
+        "Grade 12A", "Grade 12B", "Grade 12C",
+        "Other"
+    ];
   const handleChange = (e) => {
     setFormData({
       ...formData,
