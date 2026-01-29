@@ -24,6 +24,34 @@ function StudentSignup() {
       [e.target.name]: e.target.value,
     });
   };
+
+  const validateForm = () => {
+    if (!formData.firstName || !formData.lastName) {
+      setError("Please enter your full name");
+      return false;
+    }
+    if (!formData.email.includes("@")) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return false;
+    }
+    if (!formData.studentId) {
+      setError("Student ID is required");
+      return false;
+    }
+    if (!formData.gradeLevel) {
+      setError("Please select your grade level");
+      return false;
+    }
+    return true;
+  };
  return(
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
         <div>
@@ -85,6 +113,45 @@ function StudentSignup() {
                 />
                     </div>
                 </div>
+                 
+                 {/* Student Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Student ID *
+                </label>
+                <input
+                  type="text"
+                  name="studentId"
+                  placeholder="DHS20240001"
+                  value={formData.studentId}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Enter your school-provided ID</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Grade Level *
+                </label>
+                <select
+                  name="gradeLevel"
+                  value={formData.gradeLevel}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Grade Level</option>
+                  {gradeLevels.map((grade) => (
+                    <option key={grade} value={grade}>
+                      {grade}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             </form>
         )}
         </div>
