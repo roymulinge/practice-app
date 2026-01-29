@@ -2,14 +2,24 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc } from "firebase/firestore"; // ADD setDoc
+import { doc, getDoc } from "firebase/firestore";
 
 export default function AdminLogin() {
+  // Basic UI state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  /*
+    Teaching notes (short):
+    1) Sign in with Firebase Auth using email/password.
+    2) Immediately read the corresponding `users/{uid}` document in Firestore.
+    3) Only allow access when that document explicitly has `role: 'admin'`.
+    4) Do NOT auto-create admin documents on sign-in (safer).
+    5) Store role in localStorage only after verification so the UI can rely on it.
+  */
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -17,44 +27,43 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // 1. Sign in with Firebase Auth
+      // 1) Sign in the user
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
       const userEmail = userCredential.user.email;
 
-      // 2. Check or create user document
+      // 2) Read the user doc from Firestore to confirm role
       const userDocRef = doc(db, "users", uid);
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-        // Create admin document if it doesn't exist
-        await setDoc(userDocRef, {
-          email: userEmail,
-          role: "admin",
-          name: "Administrator",
-          createdAt: new Date()
-        });
-      } else {
-        // Check if already has admin role
-        if (userDoc.data().role !== "admin") {
-          setError("Admin access required.");
-          await auth.signOut();
-          return;
-        }
+        // No user doc -> do not grant admin access automatically
+        setError("Admin profile not found. Ask the site owner to create your admin record in Firestore.");
+        await auth.signOut();
+        return;
       }
 
-      // 3. Success - set localStorage and navigate
+      const data = userDoc.data();
+      if (data.role !== "admin") {
+        // Signed-in user is not an admin
+        setError("You do not have admin permissions.");
+        await auth.signOut();
+        return;
+      }
+
+      // 3) Verified admin: persist minimal local state and navigate
       localStorage.setItem("role", "admin");
-      localStorage.setItem("adminEmail", userEmail);
+      localStorage.setItem("adminEmail", userEmail || "");
       navigate("/admin-dashboard");
-      
+
     } catch (err) {
+      // Friendly error messages
       if (err.code === "auth/user-not-found") {
-        setError("No admin account found.");
+        setError("No account found with that email.");
       } else if (err.code === "auth/wrong-password") {
         setError("Incorrect password.");
       } else {
-        setError("Login failed: " + err.message);
+        setError(err.message || "Login failed.");
       }
     } finally {
       setLoading(false);
@@ -86,12 +95,16 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-60"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
         {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+
+        <div className="mt-4 text-sm text-gray-600">
+          <p>If you expect to be an admin but see "Admin profile not found", ask the site owner to add your UID to Firestore in `users` with `role: 'admin'`.</p>
+        </div>
       </div>
     </div>
   );

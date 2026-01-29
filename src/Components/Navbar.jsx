@@ -44,7 +44,9 @@ export default function Navbar({ user }) {
           </div>
 
           <div className="flex items-center space-x-4">
-            {user ? (
+            {/* Only show the logout UI when we have a signed-in user AND we've set a known role in localStorage.
+                This avoids the brief UI flicker where auth is present but role hasn't been verified yet. */}
+            {user && role ? (
               <>
                 <span className="hidden md:inline text-sm bg-white/20 px-3 py-1 rounded-full">
                   {role === "admin" ? "Administrator" : "Student"}
