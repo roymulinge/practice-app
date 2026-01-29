@@ -43,9 +43,9 @@ function App() {
         } />
         
         <Route path="/admin-dashboard" element={
-          user && role === "admin" ? <AdminDashboard /> : <Navigate to="/admin-login" />
+            user && role === "admin" ? <AdminDashboard /> : <Navigate to="/admin-login" />
         } />
-        
+       
         <Route path="/student-login" element={
           !user || role !== "student" ? <StudentLogin /> : <Navigate to="/student-portal" />
         } />
