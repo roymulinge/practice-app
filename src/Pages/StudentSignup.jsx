@@ -52,6 +52,80 @@ function StudentSignup() {
     }
     return true;
   };
+
+   async function handleSignup(e) {
+    e.preventDefault();
+    setError("");
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // 1. Create user in Firebase Authentication
+      const credentials = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      const uid = credentials.user.uid;
+
+      // 2. Create user document in Firestore
+      const userData = {
+        uid: uid,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        studentId: formData.studentId,
+        gradeLevel: formData.gradeLevel,
+        role: "student",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        isActive: true,
+        emailVerified: false,
+      };
+
+      await setDoc(doc(db, "users", uid), userData);
+
+      // Optional: Send email verification
+      // await sendEmailVerification(credentials.user);
+
+      setSuccess(true);
+      
+      // Auto login after successful signup
+      localStorage.setItem("role", "student");
+      localStorage.setItem("studentEmail", formData.email);
+      
+      // Show success message for 2 seconds then redirect
+      setTimeout(() => {
+        navigate("/student-portal");
+      }, 2000);
+
+    } catch (error) {
+      console.error("Signup error:", error);
+      
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          setError("This email is already registered. Please login instead.");
+          break;
+        case "auth/invalid-email":
+          setError("Invalid email address format.");
+          break;
+        case "auth/weak-password":
+          setError("Password is too weak. Use at least 6 characters.");
+          break;
+        case "auth/network-request-failed":
+          setError("Network error. Please check your connection.");
+          break;
+        default:
+          setError("Unable to create account. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
  return(
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
         <div>
@@ -150,6 +224,26 @@ function StudentSignup() {
                   ))}
                 </select>
               </div>
+            </div>
+
+            
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                School Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="john.doe@desthigh.com"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Use your school-provided email address
+              </p>
             </div>
 
             </form>
