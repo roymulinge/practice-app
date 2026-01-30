@@ -24,6 +24,13 @@ export default function Navbar({ user }) {
       ) {
         setIsAuthDropdownOpen(false);
       }
+       if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target) &&
+        !event.target.closest('.mobile-menu-toggle')
+      ) {
+        setIsMobileMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
