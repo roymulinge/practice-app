@@ -39,30 +39,13 @@ export default function Navbar({ user }) {
     };
   }, []);
 
-   // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        authDropdownRef.current && 
-        !authDropdownRef.current.contains(event.target) &&
-        authButtonRef.current && 
-        !authButtonRef.current.contains(event.target)
-      ) {
-        setIsAuthDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
+  
    // Close dropdown on Escape key
   useEffect(() => {
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
         setIsAuthDropdownOpen(false);
+        setIsMobileMenuOpen(false);
       }
     };
 
@@ -74,6 +57,9 @@ export default function Navbar({ user }) {
 
    const toggleAuthDropdown = () => {
     setIsAuthDropdownOpen(!isAuthDropdownOpen);
+  };
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const handleAuthAction = (action) => {
