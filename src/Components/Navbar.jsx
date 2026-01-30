@@ -106,15 +106,34 @@ export default function Navbar({ user }) {
             </div>
           </Link>
 
+         {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="hover:text-blue-200 transition-colors">Home</Link>
+            <Link 
+              to="/" 
+              className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium text-lg relative group"
+            >
+              Home
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-300"></span>
+            </Link>
             
             {role === "student" && (
-              <Link to="/student-portal" className="hover:text-blue-200 transition-colors">My Portal</Link>
+              <Link 
+                to="/student-portal" 
+                className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium text-lg relative group"
+              >
+                My Portal
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-300"></span>
+              </Link>
             )}
             
             {role === "admin" && (
-              <Link to="/admin-dashboard" className="hover:text-blue-200 transition-colors">Dashboard</Link>
+              <Link 
+                to="/admin-dashboard" 
+                className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium text-lg relative group"
+              >
+                Dashboard
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-300"></span>
+              </Link>
             )}
             
             
