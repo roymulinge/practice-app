@@ -69,7 +69,7 @@ export default function Navbar({ user }) {
     } else if (action === 'admin-login') {
       navigate('/admin-login');
     } else if (action === 'student-signup') {
-      navigate('/student-signup'); // You'll need to create this route
+      navigate('/student-signup'); 
     }
   };
 
@@ -89,11 +89,21 @@ export default function Navbar({ user }) {
     <nav className="bg-gradient-to-r from-blue-900         to-indigo-900 text-white shadow-xl mt-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-white to-blue-200 rounded-lg flex items-center justify-center">
-              <span className="font-bold text-blue-900 text-lg">D</span>
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300 shadow-lg">
+                <span className="font-bold text-white text-2xl">D</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-transparent rounded-2xl"></div>
+              </div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
             </div>
-            <span className="text-xl font-bold">DEST HIGH INTL</span>
+            <div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                DEST HIGH
+              </span>
+              <span className="block text-xs text-gray-500 font-medium">International School</span>
+            </div>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
