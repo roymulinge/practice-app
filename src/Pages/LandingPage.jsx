@@ -1,76 +1,275 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      setMousePosition({
+        x: event.clientX,
+        y: event.clientY
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  // Create gradient background that follows mouse
+  const backgroundStyle = {
+    background: `
+      radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, 
+        rgba(59, 130, 246, 0.15) 0%, 
+        rgba(79, 70, 229, 0.1) 25%, 
+        rgba(255, 255, 255, 0) 50%
+      ),
+      linear-gradient(135deg, 
+        #0f172a 0%, 
+        #1e293b 25%, 
+        #312e81 50%, 
+        #3730a3 75%, 
+        #0f172a 100%
+      )
+    `
+  };
 
   return (
-    <div className="min-h-[90vh] flex flex-col lg:flex-row items-center justify-between text-left
-    bg-gradient-to-r from-blue-800 via-blue-900 to-indigo-900
- text-white px-4">
-      <div className="max-w-7xl mx-auto w-full px-6
-">
-        <div className="mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white text-5xl md:text-6xl font-extrabold leading-tight
-">
-            DEST HIGH INTERNATIONAL
-          </h1>
-          <p className="text-xl md:text-2xl text-blue-100 mb-6">
-            Excellence in Education Management
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div 
+        className="absolute inset-0 transition-all duration-300 ease-out"
+        style={backgroundStyle}
+      >
+        {/* Animated gradient orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-500"></div>
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: `linear-gradient(to right, white 1px, transparent 1px),
+                          linear-gradient(to bottom, white 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 pt-32 pb-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Hero Section */}
+          <div className="text-center mb-20">
+            <div className="inline-block mb-8">
+              <span className="px-4 py-2 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-full text-blue-300 text-sm font-semibold border border-blue-500/30">
+                🎓 International School Management System
+              </span>
+            </div>
+            
+            <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-blue-400 via-blue-300 to-indigo-300 bg-clip-text text-transparent">
+                DEST HIGH
+              </span>
+              <br />
+              <span className="text-white text-5xl md:text-7xl">
+                INTERNATIONAL
+              </span>
+            </h1>
+            
+            <p className="text-2xl md:text-3xl text-blue-100 mb-10 max-w-3xl mx-auto font-light">
+              Transforming Education Management with 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300 font-semibold"> Cutting-Edge Technology</span>
+            </p>
+
+            <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-20">
+              <button
+                onClick={() => navigate("/admin-login")}
+                className="group relative px-12 py-5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
+              >
+                <span className="relative z-10">🎯 Administrator Login</span>
+                <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+              </button>
+
+              <button
+                onClick={() => navigate("/student-login")}
+                className="group relative px-12 py-5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
+              >
+                <span className="relative z-10">🚀 Student Portal Access</span>
+                <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+              </button>
+            </div>
+
+            {/* Stats Section */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-20">
+              <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:border-blue-500/30 transition-all duration-300">
+                <div className="text-4xl font-bold text-blue-300 mb-2">500+</div>
+                <div className="text-blue-100">Students Enrolled</div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:border-purple-500/30 transition-all duration-300">
+                <div className="text-4xl font-bold text-purple-300 mb-2">98%</div>
+                <div className="text-blue-100">Payment Efficiency</div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:border-green-500/30 transition-all duration-300">
+                <div className="text-4xl font-bold text-green-300 mb-2">24/7</div>
+                <div className="text-blue-100">System Availability</div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:border-rose-500/30 transition-all duration-300">
+                <div className="text-4xl font-bold text-rose-300 mb-2">100%</div>
+                <div className="text-blue-100">Data Security</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Features Section */}
+          <div className="mb-24">
+            <h2 className="text-4xl md:text-5xl font-bold text-center text-white mb-16">
+              <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                Powerful Features
+              </span>
+              <br />
+              <span className="text-2xl md:text-3xl text-blue-200 font-light">
+                Everything you need in one platform
+              </span>
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="group bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/20 hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Smart Fee Management</h3>
+                <p className="text-blue-200 mb-6">Track payments, generate receipts, and monitor balances with our intelligent fee tracking system.</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Real-time payment tracking
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Automated receipt generation
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Outstanding balance alerts
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="group bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/20 hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Student Profiles</h3>
+                <p className="text-blue-200 mb-6">Comprehensive student records with academic, financial, and personal information in one place.</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Complete academic history
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Financial records tracking
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Attendance & performance
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="group bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/20 hover:border-cyan-500/50 transition-all duration-500 hover:-translate-y-2">
+                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Secure Access</h3>
+                <p className="text-blue-200 mb-6">Enterprise-grade security with role-based authentication and data encryption.</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Role-based authentication
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    End-to-end encryption
+                  </li>
+                  <li className="flex items-center text-blue-100">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    GDPR compliant
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 rounded-3xl blur-3xl"></div>
+            <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl p-12 rounded-3xl border border-white/20">
+              <h2 className="text-4xl font-bold text-white mb-6">
+                Ready to Transform Your School Management?
+              </h2>
+              <p className="text-xl text-blue-200 mb-8 max-w-2xl mx-auto">
+                Join hundreds of educational institutions that trust DEST HIGH for their management needs.
+              </p>
+              <button
+                onClick={() => navigate("/student-signup")}
+                className="group relative px-10 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
+              >
+                <span className="relative z-10">🎓 Start Your Journey Today</span>
+                <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="relative w-full text-center py-8 px-4 border-t border-white/10">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-blue-300">
+            &copy; {new Date().getFullYear()} DEST HIGH INTERNATIONAL. All rights reserved.
           </p>
-        </div>
-
-        <p className="text-lg text-blue-200 mb-10 max-w-2xl mx-auto">
-          Streamline student management, fee tracking, and administrative tasks with our comprehensive school portal system.
-        </p>
-
-        <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-16">
-          <button
-            onClick={() => navigate("/admin-login")}
-            className="group relative bg-gradient-to-r bg-pink-500 hover:bg-pink-600 px-10 py-4 rounded-full font-semibold shadow-xl
-"
-          >
-            <span className="relative z-10">Administrator Login</span>
-            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300"></div>
-          </button>
-
-          <button
-            onClick={() => navigate("/student-login")}
-            className="group relative bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
-          >
-            <span className="relative z-10">Student Portal Access</span>
-            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300"></div>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
-            <h3 className="text-xl font-bold mb-3">Fee Management</h3>
-            <p className="text-blue-100">Track payments, generate receipts, and monitor balances in real-time.</p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
-            <h3 className="text-xl font-bold mb-3">Student Profiles</h3>
-            <p className="text-blue-100">Complete student records with academic and financial information.</p>
-          </div>
-          
-          <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
-            <h3 className="text-xl font-bold mb-3">Secure Access</h3>
-            <p className="text-blue-100">Role-based authentication ensures data security and privacy.</p>
+          <p className="mt-2 text-sm text-blue-400/70">
+            Version 3.0 | Modern School Management System • Built with ❤️ for education
+          </p>
+          <div className="mt-4 flex justify-center space-x-6">
+            <a href="#" className="text-blue-300 hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="text-blue-300 hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="text-blue-300 hover:text-white transition-colors">Contact Support</a>
+            <a href="#" className="text-blue-300 hover:text-white transition-colors">Documentation</a>
           </div>
         </div>
-      </div>
-
-      <div className="mt-12 lg:mt-0 lg:w-1/2 flex justify-center">
-        <div className="w-80 h-80 bg-white/5 rounded-3xl backdrop-blur-md flex items-center justify-center">
-          <span className="text-blue-200">Illustration Here</span>
-        </div>
-      </div>
-
-
-      <footer className="relative mt-20
-       w-full text-center p-6 text-blue-300 text-sm">
-        <p>&copy; {new Date().getFullYear()} DEST HIGH INTERNATIONAL. All rights reserved.</p>
-        <p className="mt-2 text-xs opacity-75">Version 2.0 | School Management System</p>
       </footer>
     </div>
   );
