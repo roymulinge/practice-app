@@ -3,13 +3,13 @@ import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTime
 import { db, auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-
+import { createUserWithEmailAndPassword } from "firebase/auth";
 export default function AdminDashboard() {
   const [page, setPage] = useState("dashboard");
   const [students, setStudents] = useState([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [admission, setAdmission] = useState("");
+  const [admissionNo, setAdmissionNo] = useState("");
   const [className, setClassName] = useState("");
   const [expectedFee, setExpectedFee] = useState("");
   const [feePaid, setFeePaid] = useState("");
@@ -17,6 +17,18 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
   const navigate = useNavigate();
+
+  const classOptions = [
+    "Form 1A", "Form 1B", "Form 1C", "Form 1D",
+    "Form 2A", "Form 2B", "Form 2C", "Form 2D",
+    "Form 3A", "Form 3B", "Form 3C", "Form 3D",
+    "Form 4A", "Form 4B", "Form 4C", "Form 4D",
+    "Grade 9A", "Grade 9B", "Grade 9C",
+    "Grade 10A", "Grade 10B", "Grade 10C",
+    "Grade 11A", "Grade 11B", "Grade 11C",
+    "Grade 12A", "Grade 12B", "Grade 12C",
+    "Other"
+];
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("adminEmail");
@@ -47,17 +59,37 @@ export default function AdminDashboard() {
 
   const handleAddStudent = async (e) => {
     e.preventDefault();
-    if (!name || !email || !admission || !className || !expectedFee) {
+    if (!name || !email || !admissionNo || !className || !expectedFee) {
       setMessage("Please fill all required fields.");
       return;
     }
 
     try {
       setLoading(true);
+   // create user in firebase Authentication
+      const defaultPassword = "DEST@2024";
+
+      const userCredential = await createUserWithEmailAndPassword(auth, email, defaultPassword);
+      const uid = userCredential.user.uid;
       await addDoc(collection(db, "students"), {
+        uid: uid,
+        firstName: name.split(' ')[0] || name,
+        lastName: name.split(' ').slice(1).join(' ') || name,
+        email: email,
+        admissionNo: admissionNo,
+        className: className,
+        role: "student",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        isActive: true,
+        createdBy: adminEmail
+      });
+
+      await addDoc(collection(db, "students"), {
+        uid: uid, // Link to authentication user
         name,
         email,
-        admissionNo: admission,
+        admissionNo: admissionNo,
         className,
         expectedFee: Number(expectedFee),
         feePaid: Number(feePaid) || 0,
@@ -65,10 +97,10 @@ export default function AdminDashboard() {
         updatedAt: serverTimestamp()
       });
 
-      setMessage(`Student "${name}" added successfully!`);
+      setMessage(`Student "${name}" added successfully! Default password: ${defaultPassword}`);
       setName("");
       setEmail("");
-      setAdmission("");
+      setAdmissionNo("");
       setClassName("");
       setExpectedFee("");
       setFeePaid("");
@@ -82,6 +114,15 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error adding student:", error);
       setMessage("Failed to add student. Please try again.");
+       if (error.code === "auth/email-already-in-use") {
+        setMessage("This email is already registered. Student can use 'Forgot Password' to reset.");
+      } else if (error.code === "auth/invalid-email") {
+        setMessage("Invalid email address format.");
+      } else if (error.code === "auth/weak-password") {
+        setMessage("Password is too weak. Please use a stronger password.");
+      } else {
+        setMessage("Failed to add student. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -168,7 +209,13 @@ export default function AdminDashboard() {
 
       <main className="flex-1 p-8 overflow-auto">
         {message && (
-          <div className="max-w-4xl mx-auto mb-6 bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-xl">
+          <div className={`max-w-4xl mx-auto mb-6 px-6 py-4 rounded-xl ${
+            message.includes("successfully") 
+              ? "bg-green-50 border border-green-200 text-green-700" 
+              : message.includes("already registered")
+              ? "bg-yellow-50 border border-yellow-200 text-yellow-700"
+              : "bg-red-50 border border-red-200 text-red-700"
+          }`}>
             {message}
           </div>
         )}
@@ -235,7 +282,8 @@ export default function AdminDashboard() {
                   >
                     View All Students
                   </button>
-                  <button 
+                 <button 
+                    onClick={() => setPage("reports")}
                     className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all"
                   >
                     Generate Report
@@ -287,24 +335,29 @@ export default function AdminDashboard() {
                     <label className="block text-gray-700 mb-2">Admission Number *</label>
                     <input
                       type="text"
-                      value={admission}
-                      onChange={e => setAdmission(e.target.value)}
-                      placeholder="DEST/2024/001"
+                      value={admissionNo}
+                      onChange={e => setAdmissionNo(e.target.value)}
+                      placeholder="DHS2024001"
                       className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-gray-700 mb-2">Class/Grade *</label>
-                    <input
-                      type="text"
-                      value={className}
-                      onChange={e => setClassName(e.target.value)}
-                      placeholder="Grade 11A"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
+                    <label className="block text-gray-700 mb-2">Class/Form *</label>
+                      <select
+                          value={className}
+                          onChange={e => setClassName(e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                      >
+                          <option value="">Select Class/Form</option>
+                          {classOptions.map((classOption) => (
+                              <option key={classOption} value={classOption}>
+                                  {classOption}
+                              </option>
+                          ))}
+                      </select>
                   </div>
                 </div>
 
@@ -333,12 +386,27 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    <strong>Note:</strong> A default password <code className="bg-white px-2 py-1 rounded border">DEST@2024</code> will be set for this student.
+                    They can reset it after first login.
+                  </p>
+                </div>
+               
                 <button
                   type="submit"
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 rounded-lg font-semibold text-lg shadow-lg transition-all duration-300 disabled:opacity-50"
                 >
-                  {loading ? "Adding Student..." : "Add Student to System"}
+                 {loading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating Account...
+                    </span>
+                  ) : "Add Student to System"}
                 </button>
               </form>
             </div>
@@ -466,7 +534,21 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-                
+                 <div>
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">Class Distribution</h2>
+                  <div className="space-y-4">
+                    {classOptions.map(cls => {
+                      const classStudents = students.filter(s => s.className === cls);
+                      if (classStudents.length === 0) return null;
+                      return (
+                        <div key={cls} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                          <span className="font-medium">{cls}</span>
+                          <span className="font-bold text-blue-600">{classStudents.length} students</span>
+                        </div>
+                      );
+                    }).filter(Boolean)}
+                  </div>
+                </div>
                 
               </div>
             </div>

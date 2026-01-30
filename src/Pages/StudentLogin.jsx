@@ -9,6 +9,7 @@ function StudentLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showReset, setShowReset] = useState(false);
   const navigate = useNavigate();
 
   async function handleLogin(e) {
@@ -16,35 +17,73 @@ function StudentLogin() {
     setError("");
     setLoading(true);
 
-    try {
+     try {
       const credentials = await signInWithEmailAndPassword(auth, email, password);
       const uid = credentials.user.uid;
 
-      const userDoc = await getDoc(doc(db, "users", uid));
+      // Check BOTH collections for student data
+      const [userDoc, studentDoc] = await Promise.all([
+        getDoc(doc(db, "users", uid)),
+        getDoc(doc(db, "students", uid))
+      ]);
 
-      if (!userDoc.exists() || userDoc.data().role !== "student") {
+      // Either document should exist with student role
+      const isStudentInUsers = userDoc.exists() && userDoc.data().role === "student";
+      const isStudentInStudents = studentDoc.exists();
+
+      if (!isStudentInUsers && !isStudentInStudents) {
         await auth.signOut();
-        setError("Student account not found.");
+        setError("Student account not found or not properly configured.");
         return;
       }
 
+      // Store data from whichever document exists
+      const studentData = isStudentInUsers ? userDoc.data() : studentDoc.data();
+      
       localStorage.setItem("role", "student");
       localStorage.setItem("studentEmail", email);
+      localStorage.setItem("studentName", studentData.name || `${studentData.firstName} ${studentData.lastName}`);
+      localStorage.setItem("admissionNo", studentData.admissionNo || "");
+      localStorage.setItem("className", studentData.className || "");
+      
       navigate("/student-portal");
     } catch (error) {
-      if (error.code === "auth/user-not-found") {
-        setError("No student account found.");
-      } else if (error.code === "auth/wrong-password") {
-        setError("Incorrect password.");
-      } else {
-        setError("Unable to login. Please try again.");
+      console.error("Login error:", error);
+      
+      switch (error.code) {
+        case "auth/user-not-found":
+          setError("No account found with this email.");
+          break;
+        case "auth/wrong-password":
+          setError("Incorrect password. Click 'Forgot Password?' to reset.");
+          setShowReset(true);
+          break;
+        case "auth/too-many-requests":
+          setError("Too many failed attempts. Account temporarily disabled.");
+          break;
+        default:
+          setError("Unable to login. Please try again.");
       }
     } finally {
       setLoading(false);
     }
   }
 
-  return (
+  const handleResetPassword = async () => {
+    if (!email) {
+      setError("Please enter your email first.");
+      return;
+    }
+    
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setError("Password reset email sent! Check your inbox.");
+    } catch (error) {
+      setError("Failed to send reset email. Please try again.");
+    }
+  };
+
+   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-blue-800 mb-2">
@@ -89,11 +128,29 @@ function StudentLogin() {
         {error && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 text-center">{error}</p>
+            {showReset && (
+              <button
+                onClick={handleResetPassword}
+                className="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                Forgot Password? Reset it here
+              </button>
+            )}
           </div>
         )}
 
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => navigate("/student-signup")}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            Don't have an account? Sign up here
+          </button>
+        </div>
+
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>Use your school-provided credentials</p>
+          <p className="mt-1 text-xs">Admin-created accounts use default password: DEST@2024</p>
         </div>
       </div>
     </div>

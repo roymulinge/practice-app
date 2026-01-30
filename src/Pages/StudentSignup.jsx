@@ -4,15 +4,16 @@ import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 function StudentSignup() {
-    const [formData, setFormData] = useState({
+        const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    studentId: "",
+    admissionNo: "", // Changed from studentId to admissionNo
     className: "",
-  });
+    });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -46,6 +47,10 @@ function StudentSignup() {
     if (!formData.email.includes("@")) {
       setError("Please enter a valid email address");
       return false;
+    }
+    if (!formData.admissionNo) {
+    setError("Admission Number is required");
+    return false;
     }
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters");
@@ -87,11 +92,11 @@ function StudentSignup() {
 
       // 2. Create user document in Firestore
       const userData = {
-        uid: uid,
+         uid: uid,
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        studentId: formData.studentId,
+        admissionNo: formData.admissionNo, // Use admissionNo
         className: formData.className,
         role: "student",
         createdAt: serverTimestamp(),
@@ -100,7 +105,19 @@ function StudentSignup() {
         emailVerified: false,
       };
 
-      await setDoc(doc(db, "users", uid), userData);
+      const studentData = {
+        uid: uid,
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        admissionNo: formData.admissionNo,
+        className: formData.className,
+        expectedFee: 0, // Default to 0, admin can update later
+        feePaid: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+        };
+
+        await setDoc(doc(db, "students", uid), studentData);
 
     
 
@@ -209,7 +226,7 @@ function StudentSignup() {
                 <input
                   type="text"
                   name="studentId"
-                  placeholder="DHS20240001"
+                  placeholder="DHS2024001"
                   value={formData.studentId}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
