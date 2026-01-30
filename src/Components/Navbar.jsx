@@ -7,9 +7,10 @@ export default function Navbar({ user }) {
   const navigate = useNavigate();
   const role = localStorage.getItem("role");
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const authDropdownRef = useRef(null);
   const authButtonRef = useRef(null);
-
+  const mobileMenuRef = useRef(null);
 
   
   // Close dropdown when clicking outside
