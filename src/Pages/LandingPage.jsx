@@ -263,12 +263,6 @@ export default function LandingPage() {
           <p className="mt-2 text-sm text-blue-400/70">
             Institutional Management System • Designed for Educational Excellence
           </p>
-          <div className="mt-4 flex justify-center space-x-6">
-            <a href="#" className="text-blue-300 hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="text-blue-300 hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="text-blue-300 hover:text-white transition-colors">Contact Support</a>
-            <a href="#" className="text-blue-300 hover:text-white transition-colors">Documentation</a>
-          </div>
         </div>
       </footer>
     </div>

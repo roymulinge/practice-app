@@ -277,56 +277,66 @@ export default function AdminDashboard() {
   const paidStudents = students.filter(s => (s.feePaid || 0) >= (s.expectedFee || 0)).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <aside className="w-64 bg-gradient-to-b from-blue-900 to-indigo-900 text-white shadow-xl">
-        <div className="p-6">
-          <div className="flex items-center mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-white to-blue-200 rounded-full flex items-center justify-center mr-3">
-              <span className="font-bold text-blue-900 text-xl">A</span>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex">
+      <aside className="w-72 bg-white shadow-2xl border-r border-gray-200 sticky top-0 h-screen flex flex-col">
+        <div className="p-8">
+          {/* Logo/Branding */}
+          <div className="flex items-center mb-10">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+              <span className="font-bold text-white text-2xl">🏢</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold">Admin Panel</h2>
-              <p className="text-sm text-blue-200 truncate">{adminInfo?.email || adminInfo?.name || ""}</p>
+              <h2 className="text-xl font-bold text-gray-900">Admin Portal</h2>
+              <p className="text-xs text-gray-500 font-semibold tracking-wide">MANAGEMENT</p>
             </div>
           </div>
 
-          <nav className="space-y-2">
+          {/* Navigation */}
+          <nav className="space-y-2 flex-1">
             <button
               onClick={() => setPage("dashboard")}
-              className={`w-full text-left p-3 rounded-lg transition-all ${page === "dashboard" ? "bg-white/20" : "hover:bg-white/10"}`}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "dashboard" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              📊 Dashboard Overview
+              <span className="text-xl">📊</span> Dashboard
             </button>
             <button
               onClick={() => setPage("add")}
-              className={`w-full text-left p-3 rounded-lg transition-all ${page === "add" ? "bg-white/20" : "hover:bg-white/10"}`}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "add" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              ➕ Add New Student
+              <span className="text-xl">➕</span> Add Student
             </button>
             <button
               onClick={() => setPage("students")}
-              className={`w-full text-left p-3 rounded-lg transition-all ${page === "students" ? "bg-white/20" : "hover:bg-white/10"}`}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "students" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              👥 Students List
+              <span className="text-xl">👥</span> Students List
             </button>
             <button
               onClick={() => setPage("reports")}
-              className={`w-full text-left p-3 rounded-lg transition-all ${page === "reports" ? "bg-white/20" : "hover:bg-white/10"}`}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "reports" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              📈 Financial Reports
+              <span className="text-xl">📈</span> Reports
             </button>
           </nav>
 
-          <button
-            onClick={handleLogout}
-            className="mt-8 w-full bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 p-3 rounded-lg font-semibold shadow-lg transition-all duration-300"
-          >
-            Logout
-          </button>
+          {/* Admin Info Card */}
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 mb-6">
+              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Logged in as</p>
+              <p className="text-sm font-bold text-gray-900 truncate">{adminInfo?.email || "Administrator"}</p>
+            </div>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-3 rounded-lg font-semibold shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <span>🚪</span> Logout
+            </button>
+          </div>
         </div>
       </aside>
 
-      <main className="flex-1 p-8 overflow-auto">
+      <main className="flex-1 p-8 overflow-auto bg-gradient-to-b from-gray-900 to-gray-800">
         {message && (
           <div className={`max-w-4xl mx-auto mb-6 px-6 py-4 rounded-xl ${
             message.includes("successfully") 
@@ -341,7 +351,7 @@ export default function AdminDashboard() {
 
         {page === "dashboard" && (
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
+            <h1 className="text-4xl font-bold text-white mb-8">Dashboard Overview</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-blue-500">

@@ -205,21 +205,6 @@ export default function StudentPortal() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-xl p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Quick Links</h3>
-                <div className="space-y-3">
-                  <button className="w-full text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                    📄 Download Fee Statement
-                  </button>
-                  <button className="w-full text-left p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
-                    📧 Contact Administrator
-                  </button>
-                  <button className="w-full text-left p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                    📚 Academic Resources
-                  </button>
-                </div>
-              </div>
-
               <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-6 text-white">
                 <h3 className="text-xl font-bold mb-3">Need Help?</h3>
                 <p className="mb-4">Contact the school administration for any queries regarding fees or academic matters.</p>
