@@ -41,6 +41,28 @@ export default function AdminLogin() {
        localStorage.setItem("uid", uid);
       localStorage.setItem("userEmail", email);
       localStorage.setItem("adminData", JSON.stringify(adminData));
+
+      navigate("/admin-dashboard")
+    }
+    catch(error){
+      console.error("Login error details:", err);
+      
+      //Handles firebase errors
+      if(err.code === "auth/user-not-found"){
+        setError("No admin account found with this email.");
+      } else if(err.code === "auth/wrong-password"){
+        setError("Incorrect password. Please try again.");
+      }else if (err.code === "auth/invalid-email"){
+        setError("Invalid email address");
+      }else if (err.code === "auth/invalid-credential") {
+        setError("Invalid email or password.");
+      } else if (err.code === "auth/too-many-requests") {
+        setError("Too many failed attempts. Please try again later.");
+      } else {
+        setError(err.message || "Login failed. Please try again.");
+      }
+    }finally{
+      setLoading(false);
     }
   }
 
