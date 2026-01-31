@@ -32,9 +32,12 @@ function App() {
 
   const role = localStorage.getItem("role");
 
+  // Check if current route is an auth page (should not show navbar)
+  const isAuthPage = ["/admin-login", "/student-login", "/student-signup"].includes(window.location.pathname);
+
   return (
     <Router>
-      <Navbar user={user} />
+      {!isAuthPage && <Navbar user={user} />}
       <Routes>
         <Route path="/" element={<LandingPage />} />
         
