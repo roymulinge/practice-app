@@ -33,6 +33,14 @@ export default function AdminLogin() {
         await auth.signOut(); // no admin sign out
         return;
       }
+
+      //Admin exists! Store session info
+      const adminData = adminDoc.data();
+      console.log("Adimn data found:", adminData);
+      localStorage.setItem("auth_token", userCredential.user.accessToken || "");
+       localStorage.setItem("uid", uid);
+      localStorage.setItem("userEmail", email);
+      localStorage.setItem("adminData", JSON.stringify(adminData));
     }
   }
 
