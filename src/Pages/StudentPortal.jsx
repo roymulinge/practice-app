@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -29,20 +29,17 @@ export default function StudentPortal() {
       if (!user) return;
 
       try {
-        const q = query(
-          collection(db, "students"),
-          where("uid", "==", user.uid)
-        );
+        // Read student document directly by uid 
+        const studentDocRef = doc(db, "students", user.uid);
+        const studentDoc = await getDoc(studentDocRef);
 
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
+        if (!studentDoc.exists()) {
           setError("Student record not found in database.");
         } else {
-          const student = snapshot.docs[0].data();
+          const student = studentDoc.data();
           setStudentData({
             ...student,
-            id: snapshot.docs[0].id,
+            id: studentDoc.id,
             balance: student.expectedFee - student.feePaid
           });
         }
