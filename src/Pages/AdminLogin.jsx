@@ -20,7 +20,19 @@ export default function AdminLogin() {
       //  sign in with Firebase Auth
       console.log("Attempting to sign in with:", email);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      
+      console.log("Auth successful! User UID:", userCredential.user.uid);
+
+      //check user in firestore
+      const uid = userCredential.user.uid;
+      const adminDocRef = doc(db, "admins", uid);
+      const adminDoc = await getDoc(adminDocRef);
+
+      if(!adminDoc.exists()){
+        console.log("No admin document found for this user");
+        setError("Access denied. You don't have administrator privilages.");
+        await auth.signOut(); // no admin sign out
+        return;
+      }
     }
   }
 
