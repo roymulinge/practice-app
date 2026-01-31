@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
@@ -56,11 +56,29 @@ export default function AdminLogin() {
       const adminData = adminDoc.data();
       console.log("Admin data found:", adminData);
       localStorage.setItem("auth_token", userCredential.user.accessToken || "");
-       localStorage.setItem("uid", uid);
+      localStorage.setItem("uid", uid);
       localStorage.setItem("userEmail", email);
+      localStorage.setItem("adminEmail", email);
       localStorage.setItem("adminData", JSON.stringify(adminData));
+      //set role
+      localStorage.setItem("role", "admin");
 
-      navigate("/admin-dashboard")
+      // wait for auth state to update to navigate 
+      const unsubscribe = onAuthStateChanged(auth, (u) => {
+        if (u) {
+          unsubscribe();
+          navigate("/admin-dashboard");
+        }
+      });
+
+      // Fallback: if auth state doesn't fire quickly, navigate after short delay
+      setTimeout(() => {
+        try {
+          navigate("/admin-dashboard");
+        } catch (e) {
+          // ignore
+        }
+      }, 800);
     }
     catch(error){
       console.error("Login error details:", error);
