@@ -297,25 +297,25 @@ export default function AdminDashboard() {
               onClick={() => setPage("dashboard")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "dashboard" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              <span className="text-xl">📊</span> Dashboard
+              <span className="text-xl"></span> Dashboard
             </button>
             <button
               onClick={() => setPage("add")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "add" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              <span className="text-xl">➕</span> Add Student
+              <span className="text-xl"></span> Add Student
             </button>
             <button
               onClick={() => setPage("students")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "students" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              <span className="text-xl">👥</span> Students List
+              <span className="text-xl"></span> Students List
             </button>
             <button
               onClick={() => setPage("reports")}
               className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 font-medium flex items-center gap-3 ${page === "reports" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100"}`}
             >
-              <span className="text-xl">📈</span> Reports
+              <span className="text-xl"></span> Reports
             </button>
           </nav>
 
@@ -330,7 +330,7 @@ export default function AdminDashboard() {
               onClick={handleLogout}
               className="w-full bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-3 rounded-lg font-semibold shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
             >
-              <span>🚪</span> Logout
+              <span></span> Logout
             </button>
           </div>
         </div>
@@ -416,11 +416,6 @@ export default function AdminDashboard() {
                     className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all"
                   >
                     Generate Report
-                  </button>
-                  <button 
-                    className="bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all"
-                  >
-                    Send Notifications
                   </button>
                 </div>
               </div>

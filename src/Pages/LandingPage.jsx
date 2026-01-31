@@ -88,7 +88,7 @@ export default function LandingPage() {
                 onClick={() => navigate("/admin-login")}
                 className="group relative px-12 py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
               >
-                <span className="relative z-10">🎯 Administrator Login</span>
+                <span className="relative z-10">Administrator Login</span>
                 <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </button>
@@ -97,7 +97,7 @@ export default function LandingPage() {
                 onClick={() => navigate("/student-login")}
                 className="group relative px-12 py-5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
               >
-                <span className="relative z-10">🚀 Student Portal Access</span>
+                <span className="relative z-10">Student Portal Access</span>
                 <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </button>
@@ -245,7 +245,7 @@ export default function LandingPage() {
                 onClick={() => navigate("/student-signup")}
                 className="group relative px-10 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
               >
-                <span className="relative z-10">📱 Access Your Institution Portal</span>
+                <span className="relative z-10">Access Your Institution Portal</span>
                 <div className="absolute inset-0 bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </button>

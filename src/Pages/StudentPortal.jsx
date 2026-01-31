@@ -211,7 +211,7 @@ export default function StudentPortal() {
                 <div className="space-y-2">
                   <p>📞 +254 706 019 928</p>
                   <p>✉️ info@desthigh.com</p>
-                  <p>🏢 Administration Block, Room 12</p>
+                  <p>Administration Block, Room 12</p>
                 </div>
               </div>
             </div>
