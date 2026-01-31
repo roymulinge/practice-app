@@ -1,21 +1,22 @@
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
-import { signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+
 export default function AdminDashboard() {
   const [page, setPage] = useState("dashboard");
   const [students, setStudents] = useState([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [admissionNo, setAdmissionNo] = useState("");
+  const [admission, setAdmission] = useState("");
   const [className, setClassName] = useState("");
   const [expectedFee, setExpectedFee] = useState("");
   const [feePaid, setFeePaid] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [adminEmail, setAdminEmail] = useState("");
+  const [adminInfo, setAdminInfo] = useState(null);
+  const [isAdminVerified, setIsAdminVerified] = useState(false);
   const navigate = useNavigate();
 
   const classOptions = [
@@ -28,15 +29,67 @@ export default function AdminDashboard() {
     "Grade 11A", "Grade 11B", "Grade 11C",
     "Grade 12A", "Grade 12B", "Grade 12C",
     "Other"
-];
+  ];
 
+  // Check if user is admin on component mount
   useEffect(() => {
-    const storedEmail = localStorage.getItem("adminEmail");
-    if (storedEmail) {
-      setAdminEmail(storedEmail);
-    }
-    loadStudents();
-  }, []);
+    const checkAdminStatus = async () => {
+      try {
+        setLoading(true);
+        const user = auth.currentUser;
+        
+        if (!user) {
+          navigate("/admin-login");
+          return;
+        }
+
+        // Check in admins collection
+        const adminDocRef = doc(db, "admins", user.uid);
+        const adminDoc = await getDoc(adminDocRef);
+
+        if (adminDoc.exists()) {
+          const adminData = adminDoc.data();
+          setAdminInfo(adminData);
+          setIsAdminVerified(true);
+          return;
+        }
+
+        // Check in users collection
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists() && userDoc.data().role === "admin") {
+          setAdminInfo(userDoc.data());
+          setIsAdminVerified(true);
+          return;
+        }
+
+        // Not an admin, redirect to login
+        setMessage("Access denied. Administrator privileges required.");
+        await auth.signOut();
+        navigate("/admin-login");
+        
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        setMessage("Failed to verify admin status. Please login again.");
+        navigate("/admin-login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Set up auth state listener
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        checkAdminStatus();
+        loadStudents();
+      } else {
+        navigate("/admin-login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   const loadStudents = async () => {
     try {
@@ -59,37 +112,44 @@ export default function AdminDashboard() {
 
   const handleAddStudent = async (e) => {
     e.preventDefault();
-    if (!name || !email || !admissionNo || !className || !expectedFee) {
+    if (!name || !email || !admission || !className || !expectedFee) {
       setMessage("Please fill all required fields.");
       return;
     }
 
     try {
       setLoading(true);
-   // create user in firebase Authentication
+      
+      // 1. Create user in Firebase Authentication
       const defaultPassword = "DEST@2024";
+      const credentials = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        defaultPassword
+      );
+      const uid = credentials.user.uid;
 
-      const userCredential = await createUserWithEmailAndPassword(auth, email, defaultPassword);
-      const uid = userCredential.user.uid;
-      await addDoc(collection(db, "students"), {
+      // 2. Create user document in "users" collection for login
+      await addDoc(collection(db, "users"), {
         uid: uid,
         firstName: name.split(' ')[0] || name,
         lastName: name.split(' ').slice(1).join(' ') || name,
         email: email,
-        admissionNo: admissionNo,
+        admissionNo: admission,
         className: className,
         role: "student",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         isActive: true,
-        createdBy: adminEmail
+        createdBy: adminInfo?.email || "admin"
       });
 
+      // 3. Create student document in "students" collection for fee management
       await addDoc(collection(db, "students"), {
-        uid: uid, // Link to authentication user
+        uid: uid,
         name,
         email,
-        admissionNo: admissionNo,
+        admissionNo: admission,
         className,
         expectedFee: Number(expectedFee),
         feePaid: Number(feePaid) || 0,
@@ -100,7 +160,7 @@ export default function AdminDashboard() {
       setMessage(`Student "${name}" added successfully! Default password: ${defaultPassword}`);
       setName("");
       setEmail("");
-      setAdmissionNo("");
+      setAdmission("");
       setClassName("");
       setExpectedFee("");
       setFeePaid("");
@@ -108,13 +168,13 @@ export default function AdminDashboard() {
       setTimeout(() => {
         setMessage("");
         setPage("students");
-      }, 2000);
+      }, 3000);
       
       loadStudents();
     } catch (error) {
       console.error("Error adding student:", error);
-      setMessage("Failed to add student. Please try again.");
-       if (error.code === "auth/email-already-in-use") {
+      
+      if (error.code === "auth/email-already-in-use") {
         setMessage("This email is already registered. Student can use 'Forgot Password' to reset.");
       } else if (error.code === "auth/invalid-email") {
         setMessage("Invalid email address format.");
@@ -128,24 +188,10 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteStudent = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete ${name}?`)) return;
-
-    try {
-      await deleteDoc(doc(db, "students", id));
-      setMessage(`Student "${name}" deleted successfully.`);
-      loadStudents();
-    } catch (error) {
-      console.error("Error deleting student:", error);
-      setMessage("Failed to delete student.");
-    }
-  };
-
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      localStorage.clear();
-      navigate("/admin-login");
+      navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
