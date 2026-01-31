@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -10,6 +10,21 @@ import StudentPortal from "./Pages/StudentPortal";
 import Navbar from "./Components/Navbar";
 import StudentLogin from "./Pages/StudentLogin";
 import StudentSignup from "./Pages/StudentSignup";
+
+// Layout wrapper to handle conditional navbar
+function AppLayout({ user, children }) {
+  const location = useLocation();
+  const authPages = ["/admin-login", "/student-login", "/student-signup"];
+  const showNavbar = !authPages.includes(location.pathname);
+
+  return (
+    <>
+      {showNavbar && <Navbar user={user} />}
+      {children}
+    </>
+  );
+}
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,13 +47,10 @@ function App() {
 
   const role = localStorage.getItem("role");
 
-  // Check if current route is an auth page (should not show navbar)
-  const isAuthPage = ["/admin-login", "/student-login", "/student-signup"].includes(window.location.pathname);
-
   return (
     <Router>
-      {!isAuthPage && <Navbar user={user} />}
-      <Routes>
+      <AppLayout user={user}>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         
         <Route path="/admin-login" element={
@@ -63,6 +75,7 @@ function App() {
         
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      </AppLayout>
     </Router>
   );
 }

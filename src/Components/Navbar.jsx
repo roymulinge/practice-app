@@ -86,72 +86,64 @@ export default function Navbar({ user }) {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-900         to-indigo-900 text-white shadow-xl mt-0">
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-2xl border-b border-gray-200/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300 shadow-lg">
-                <span className="font-bold text-white text-2xl">D</span>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/30 to-transparent rounded-2xl"></div>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="relative flex items-center justify-center">
+              {/* Premium animated badge */}
+              <div className="absolute -inset-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.5 1.5H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V8.5M10.5 1.5v5h5M10.5 1.5L15.5 6.5" stroke="currentColor" strokeWidth="0.5" fill="none"/>
+                  <path d="M7 11h6M7 14h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
               </div>
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
             </div>
             <div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
                 DEST HIGH
               </span>
-              <span className="block text-xs text-gray-500 font-medium">International School</span>
+              <span className="block text-xs text-gray-500 font-semibold tracking-wider">INSTITUTION</span>
             </div>
           </Link>
 
          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium text-lg relative group"
-            >
-              Home
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            
             {role === "student" && (
               <Link 
                 to="/student-portal" 
-                className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium text-lg relative group"
+                className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
               >
                 My Portal
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
               </Link>
             )}
             
             {role === "admin" && (
               <Link 
                 to="/admin-dashboard" 
-                className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium text-lg relative group"
+                className="text-gray-700 hover:text-blue-600 transition-colors duration-300 font-medium relative group"
               >
                 Dashboard
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute -bottom-2 left-0 w-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
               </Link>
             )}
-            
-            
           </div>
 
           {/* Auth Section */}
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <div className="hidden md:flex items-center space-x-3">
+                <div className="hidden md:flex items-center space-x-3 pr-4 border-r border-gray-200">
                   <div className="relative">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                       {role === "admin" ? "A" : "S"}
                     </div>
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full blur opacity-30"></div>
                   </div>
                   <div>
-                    <span className="block font-medium text-gray-800">
+                    <span className="block font-semibold text-gray-900 text-sm">
                       {role === "admin" ? "Administrator" : "Student"}
                     </span>
                     <span className="block text-xs text-gray-500">
@@ -161,7 +153,7 @@ export default function Navbar({ user }) {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                  className="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 rounded-lg font-semibold text-sm transition-all duration-300 border border-red-200"
                 >
                   Logout
                 </button>
@@ -170,30 +162,29 @@ export default function Navbar({ user }) {
               <div className="relative" ref={authDropdownRef}>
                 <button
                   ref={authButtonRef}
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 group"
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 group text-sm"
                   onClick={toggleAuthDropdown}
                   aria-expanded={isAuthDropdownOpen}
                   aria-haspopup="true"
                 >
                   <span>Get Started</span>
                   <svg 
-                    className={`w-4 h-4 transition-transform ${isAuthDropdownOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 transition-transform duration-300 ${isAuthDropdownOpen ? 'rotate-180' : ''}`}
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
                   </svg>
-                  <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
               
                 
                 {/* Dropdown Menu */}
                 {isAuthDropdownOpen && (
-                  <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl overflow-hidden z-50 border border-gray-100 backdrop-blur-xl">
-                    <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
-                      <h3 className="font-bold text-gray-900 text-lg">Welcome to DEST HIGH</h3>
-                      <p className="text-gray-600 mt-1 text-sm">Your journey to excellence starts here</p>
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl overflow-hidden z-50 border border-gray-200 backdrop-blur-xl">
+                    <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-b border-gray-200">
+                      <h3 className="font-bold text-gray-900 text-lg">Access Your Account</h3>
+                      <p className="text-gray-600 mt-1 text-sm">Choose your role to get started</p>
                     </div>
                     
                     <div className="p-4">
@@ -275,12 +266,12 @@ export default function Navbar({ user }) {
               {/* Mobile Menu Toggle */}
             <button
               onClick={toggleMobileMenu}
-              className="md:hidden ml-4 mobile-menu-toggle"
+              className="md:hidden ml-4 mobile-menu-toggle p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <div className="w-10 h-10 flex flex-col justify-center items-center">
-                <span className={`block w-6 h-0.5 bg-gray-700 transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-                <span className={`block w-6 h-0.5 bg-gray-700 mt-1.5 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
-                <span className={`block w-6 h-0.5 bg-gray-700 mt-1.5 transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+              <div className="w-6 h-6 flex flex-col justify-center items-center">
+                <span className={`block w-5 h-0.5 bg-gray-800 transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+                <span className={`block w-5 h-0.5 bg-gray-800 mt-1 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+                <span className={`block w-5 h-0.5 bg-gray-800 mt-1 transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
               </div>
             </button>
           </div>
@@ -291,22 +282,14 @@ export default function Navbar({ user }) {
       {isMobileMenuOpen && (
         <div 
           ref={mobileMenuRef}
-          className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-2xl rounded-b-3xl overflow-hidden"
+          className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl rounded-b-2xl overflow-hidden"
         >
           <div className="p-6 space-y-4">
-            <Link 
-              to="/" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors duration-300 font-medium text-lg"
-            >
-              Home
-            </Link>
-            
             {role === "student" && (
               <Link 
                 to="/student-portal" 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors duration-300 font-medium text-lg"
+                className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-300 font-medium"
               >
                 My Portal
               </Link>
@@ -316,7 +299,7 @@ export default function Navbar({ user }) {
               <Link 
                 to="/admin-dashboard" 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors duration-300 font-medium text-lg"
+                className="block py-3 px-4 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-300 font-medium"
               >
                 Dashboard
               </Link>
@@ -326,19 +309,19 @@ export default function Navbar({ user }) {
               <div className="pt-4 space-y-3">
                 <button
                   onClick={() => handleAuthAction('student-login')}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-xl font-medium text-lg text-left"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-lg font-medium text-left"
                 >
                   Student Login
                 </button>
                 <button
                   onClick={() => handleAuthAction('admin-login')}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-xl font-medium text-lg text-left"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-lg font-medium text-left"
                 >
                   Admin Login
                 </button>
                 <button
                   onClick={() => handleAuthAction('student-signup')}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-green-50 to-green-100 text-green-700 rounded-xl font-medium text-lg text-left"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-green-50 to-green-100 text-green-700 rounded-lg font-medium text-left"
                 >
                   Student Sign Up
                 </button>
