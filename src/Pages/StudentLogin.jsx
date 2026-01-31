@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
@@ -46,7 +46,8 @@ function StudentLogin() {
       localStorage.setItem("admissionNo", studentData.admissionNo || "");
       localStorage.setItem("className", studentData.className || "");
       
-      navigate("/student-portal");
+      // Use full-page redirect to sync with App's auth state
+      window.location.assign("/student-portal");
     } catch (error) {
       console.error("Login error:", error);
       

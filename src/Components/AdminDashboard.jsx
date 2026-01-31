@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, getDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, getDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [adminInfo, setAdminInfo] = useState(null);
   const [isAdminVerified, setIsAdminVerified] = useState(false);
+  const [editingStudentId, setEditingStudentId] = useState(null);
+  const [editingStudent, setEditingStudent] = useState(null);
   const navigate = useNavigate();
 
   const classOptions = [
@@ -195,6 +197,45 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Logout error:", error);
     }
+  };
+
+  const handleEditStudent = (student) => {
+    setEditingStudent({
+      ...student,
+      expectedFee: student.expectedFee || 0,
+      feePaid: student.feePaid || 0
+    });
+    setEditingStudentId(student.id);
+  };
+
+  const handleUpdateStudent = async (e) => {
+    e.preventDefault();
+    if (!editingStudent) return;
+
+    try {
+      setLoading(true);
+      await updateDoc(doc(db, "students", editingStudentId), {
+        expectedFee: Number(editingStudent.expectedFee),
+        feePaid: Number(editingStudent.feePaid),
+        updatedAt: serverTimestamp()
+      });
+
+      setMessage(`Student "${editingStudent.name}" fees updated successfully!`);
+      setEditingStudent(null);
+      setEditingStudentId(null);
+      setTimeout(() => setMessage(""), 3000);
+      loadStudents();
+    } catch (error) {
+      console.error("Error updating student:", error);
+      setMessage("Failed to update student fees.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingStudent(null);
+    setEditingStudentId(null);
   };
 
   const totalExpected = students.reduce((sum, student) => sum + (student.expectedFee || 0), 0);
@@ -520,12 +561,20 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="p-4">
-                            <button
-                              onClick={() => handleDeleteStudent(student.id, student.name)}
-                              className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-red-600 hover:to-pink-700"
-                            >
-                              Delete
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditStudent(student)}
+                                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700"
+                              >
+                                Edit Fees
+                              </button>
+                              <button
+                                onClick={() => handleDeleteStudent(student.id, student.name)}
+                                className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-red-600 hover:to-pink-700"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -597,6 +646,74 @@ export default function AdminDashboard() {
                 </div>
                 
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Student Modal */}
+        {editingStudent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit Student Fees</h2>
+              <form onSubmit={handleUpdateStudent} className="space-y-6">
+                <div>
+                  <label className="block text-gray-700 mb-2 font-medium">Student Name</label>
+                  <input
+                    type="text"
+                    value={editingStudent.name}
+                    disabled
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 text-gray-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2 font-medium">Expected Fee (KES) *</label>
+                  <input
+                    type="number"
+                    value={editingStudent.expectedFee}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, expectedFee: e.target.value })}
+                    placeholder="0"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2 font-medium">Fee Paid (KES) *</label>
+                  <input
+                    type="number"
+                    value={editingStudent.feePaid}
+                    onChange={(e) => setEditingStudent({ ...editingStudent, feePaid: e.target.value })}
+                    placeholder="0"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    <strong>Balance:</strong> KES {(Number(editingStudent.expectedFee) - Number(editingStudent.feePaid)).toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 disabled:opacity-50"
+                  >
+                    {loading ? "Updating..." : "Save Changes"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    disabled={loading}
+                    className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

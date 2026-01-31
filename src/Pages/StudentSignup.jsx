@@ -49,8 +49,8 @@ function StudentSignup() {
       return false;
     }
     if (!formData.admissionNo) {
-    setError("Admission Number is required");
-    return false;
+      setError("Admission Number is required");
+      return false;
     }
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters");
@@ -58,10 +58,6 @@ function StudentSignup() {
     }
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
-      return false;
-    }
-    if (!formData.studentId) {
-      setError("Student ID is required");
       return false;
     }
     if (!formData.className) {
@@ -90,13 +86,14 @@ function StudentSignup() {
       );
       const uid = credentials.user.uid;
 
-      // 2. Create user document in Firestore
+      // 2. Create user document in Firestore (required for StudentLogin)
       const userData = {
-         uid: uid,
+        uid: uid,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
-        admissionNo: formData.admissionNo, // Use admissionNo
+        admissionNo: formData.admissionNo,
         className: formData.className,
         role: "student",
         createdAt: serverTimestamp(),
@@ -105,32 +102,38 @@ function StudentSignup() {
         emailVerified: false,
       };
 
+      // Save to both users (for login) and students (for fee tracking)
+      await setDoc(doc(db, "users", uid), userData);
+
       const studentData = {
         uid: uid,
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         admissionNo: formData.admissionNo,
         className: formData.className,
-        expectedFee: 0, // Default to 0, admin can update later
+        expectedFee: 0,
         feePaid: 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-        };
+      };
 
-        await setDoc(doc(db, "students", uid), studentData);
+      await setDoc(doc(db, "students", uid), studentData);
 
     
 
       setSuccess(true);
       
-      // Auto login after successful signup
+      // Set localStorage so route guard allows access to student portal
       localStorage.setItem("role", "student");
       localStorage.setItem("studentEmail", formData.email);
+      localStorage.setItem("studentName", `${formData.firstName} ${formData.lastName}`);
+      localStorage.setItem("admissionNo", formData.admissionNo);
+      localStorage.setItem("className", formData.className);
       
       // Show success message for 2 seconds then redirect
       setTimeout(() => {
-        navigate("/student-portal");
-      }, 2000);
+        window.location.assign("/student-portal");
+      }, 1500);
 
     } catch (error) {
       console.error("Signup error:", error);
@@ -221,18 +224,18 @@ function StudentSignup() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Student ID *
+                  Admission Number *
                 </label>
                 <input
                   type="text"
-                  name="studentId"
+                  name="admissionNo"
                   placeholder="DHS2024001"
-                  value={formData.studentId}
+                  value={formData.admissionNo}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Enter your school-provided ID</p>
+                <p className="text-xs text-gray-500 mt-1">Enter your school-provided admission number</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
