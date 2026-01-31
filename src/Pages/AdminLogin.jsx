@@ -11,7 +11,18 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  
+  async function handleLogin(e) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try{
+      //  sign in with Firebase Auth
+      console.log("Attempting to sign in with:", email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
