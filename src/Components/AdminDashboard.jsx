@@ -213,7 +213,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h2 className="text-lg font-bold">Admin Panel</h2>
-              <p className="text-sm text-blue-200 truncate">{adminEmail}</p>
+              <p className="text-sm text-blue-200 truncate">{adminInfo?.email || adminInfo?.name || ""}</p>
             </div>
           </div>
 
@@ -381,8 +381,8 @@ export default function AdminDashboard() {
                     <label className="block text-gray-700 mb-2">Admission Number *</label>
                     <input
                       type="text"
-                      value={admissionNo}
-                      onChange={e => setAdmissionNo(e.target.value)}
+                      value={admission}
+                      onChange={e => setAdmission(e.target.value)}
                       placeholder="DHS2024001"
                       className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required

@@ -63,22 +63,10 @@ export default function AdminLogin() {
       //set role
       localStorage.setItem("role", "admin");
 
-      // wait for auth state to update to navigate 
-      const unsubscribe = onAuthStateChanged(auth, (u) => {
-        if (u) {
-          unsubscribe();
-          navigate("/admin-dashboard");
-        }
-      });
-
-      // Fallback: if auth state doesn't fire quickly, navigate after short delay
-      setTimeout(() => {
-        try {
-          navigate("/admin-dashboard");
-        } catch (e) {
-          // ignore
-        }
-      }, 800);
+      // Force a full-page redirect to ensure the root `App` component
+      // receives the updated Firebase auth state before route guards run.
+      // This avoids the race where the SPA route guard redirects back to login.
+      window.location.assign("/admin-dashboard");
     }
     catch(error){
       console.error("Login error details:", error);
