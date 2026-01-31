@@ -86,11 +86,11 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-20">
               <button
                 onClick={() => navigate("/admin-login")}
-                className="group relative px-12 py-5 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
+                className="group relative px-12 py-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
               >
                 <span className="relative z-10">🎯 Administrator Login</span>
                 <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"></div>
-                <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
               </button>
 
               <button

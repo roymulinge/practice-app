@@ -224,7 +224,7 @@ export default function StudentPortal() {
                 <h3 className="text-xl font-bold mb-3">Need Help?</h3>
                 <p className="mb-4">Contact the school administration for any queries regarding fees or academic matters.</p>
                 <div className="space-y-2">
-                  <p>📞 +254 700 123 456</p>
+                  <p>📞 +254 706 019 928</p>
                   <p>✉️ info@desthigh.com</p>
                   <p>🏢 Administration Block, Room 12</p>
                 </div>

@@ -19,6 +19,8 @@ export default function AdminDashboard() {
   const [isAdminVerified, setIsAdminVerified] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [deletingStudentId, setDeletingStudentId] = useState(null);
+  const [deletingStudentName, setDeletingStudentName] = useState(null);
   const navigate = useNavigate();
 
   const classOptions = [
@@ -236,6 +238,36 @@ export default function AdminDashboard() {
   const handleCancelEdit = () => {
     setEditingStudent(null);
     setEditingStudentId(null);
+  };
+
+  const handleDeleteStudent = async (studentId, studentName) => {
+    // Open delete confirmation modal
+    setDeletingStudentId(studentId);
+    setDeletingStudentName(studentName);
+  };
+
+  const confirmDeleteStudent = async () => {
+    if (!deletingStudentId) return;
+
+    try {
+      setLoading(true);
+      await deleteDoc(doc(db, "students", deletingStudentId));
+      setMessage(`Student "${deletingStudentName}" deleted successfully.`);
+      setDeletingStudentId(null);
+      setDeletingStudentName(null);
+      setTimeout(() => setMessage(""), 3000);
+      loadStudents();
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      setMessage("Failed to delete student. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelDeleteStudent = () => {
+    setDeletingStudentId(null);
+    setDeletingStudentName(null);
   };
 
   const totalExpected = students.reduce((sum, student) => sum + (student.expectedFee || 0), 0);
@@ -645,6 +677,40 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deletingStudentId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Delete Student?</h2>
+              <p className="text-gray-600 text-center mb-6">
+                Are you sure you want to delete <strong>{deletingStudentName}</strong>? This action cannot be undone.
+              </p>
+              
+              <div className="flex gap-4">
+                <button
+                  onClick={cancelDeleteStudent}
+                  disabled={loading}
+                  className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteStudent}
+                  disabled={loading}
+                  className="flex-1 bg-gradient-to-r from-red-500 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-red-600 hover:to-pink-700 disabled:opacity-50"
+                >
+                  {loading ? "Deleting..." : "Delete"}
+                </button>
               </div>
             </div>
           </div>
