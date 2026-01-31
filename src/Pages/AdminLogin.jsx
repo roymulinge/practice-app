@@ -2,7 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -22,21 +22,39 @@ export default function AdminLogin() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("Auth successful! User UID:", userCredential.user.uid);
 
-      //check user in firestore
+      // check user profile in Firestore (prefer `users/{uid}` then `admins/{uid}`)
       const uid = userCredential.user.uid;
-      const adminDocRef = doc(db, "admins", uid);
-      const adminDoc = await getDoc(adminDocRef);
+      let adminDoc = null;
+      try {
+        const userDocRef = doc(db, "users", uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data().role === "admin") {
+          adminDoc = userDoc;
+        } else {
+          const adminDocRef = doc(db, "admins", uid);
+          const adminDocSnap = await getDoc(adminDocRef);
+          if (adminDocSnap.exists()) adminDoc = adminDocSnap;
+        }
+      } catch (e) {
+        if (e.code === "permission-denied" || (e.message && e.message.includes("Missing or insufficient permissions"))) {
+          console.error("Firestore permission error:", e);
+          setError("Missing Firestore read permissions. Check your Firestore rules or add the admin record in the console.");
+          await auth.signOut();
+          return;
+        }
+        throw e;
+      }
 
-      if(!adminDoc.exists()){
+      if (!adminDoc || !adminDoc.exists()) {
         console.log("No admin document found for this user");
-        setError("Access denied. You don't have administrator privilages.");
+        setError("Access denied. You don't have administrator privileges.");
         await auth.signOut(); // no admin sign out
         return;
       }
 
-      //Admin exists! Store session info
+      // Admin exists! Store session info
       const adminData = adminDoc.data();
-      console.log("Adimn data found:", adminData);
+      console.log("Admin data found:", adminData);
       localStorage.setItem("auth_token", userCredential.user.accessToken || "");
        localStorage.setItem("uid", uid);
       localStorage.setItem("userEmail", email);
