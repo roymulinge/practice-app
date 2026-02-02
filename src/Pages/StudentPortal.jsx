@@ -13,11 +13,26 @@ export default function StudentPortal() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check localStorage first for recent login
+    const role = localStorage.getItem("role");
+    
+    if (role !== "student") {
+      navigate("/student-login");
+      return;
+    }
+
+    // Check if auth.currentUser is already available (after page reload)
+    if (auth.currentUser) {
+      setUser(auth.currentUser);
+      return;
+    }
+
+    // Otherwise wait for Firebase Auth state to sync
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (!currentUser) {
-        navigate("/student-login");
-      } else {
+      if (currentUser) {
         setUser(currentUser);
+      } else {
+        navigate("/student-login");
       }
     });
 

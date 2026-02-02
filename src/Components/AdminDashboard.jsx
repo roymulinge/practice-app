@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, getDoc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -98,17 +98,36 @@ export default function AdminDashboard() {
   const loadStudents = async () => {
     try {
       setLoading(true);
-      const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
+      let snapshot;
+      
+      try {
+        // Try with orderBy first (requires Firestore index)
+        const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
+        snapshot = await getDocs(q);
+      } catch (indexError) {
+        // If orderBy fails, try without it (simpler query, no index needed)
+        console.warn("OrderBy failed, loading without sorting:", indexError.message);
+        snapshot = await getDocs(collection(db, "students"));
+      }
+      
       const studentList = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         balance: doc.data().expectedFee - doc.data().feePaid
       }));
+      
+      // Sort by createdAt if available
+      studentList.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis?.() || 0;
+        const timeB = b.createdAt?.toMillis?.() || 0;
+        return timeB - timeA;
+      });
+      
       setStudents(studentList);
+      console.log(`Loaded ${studentList.length} students`);
     } catch (error) {
       console.error("Error loading students:", error);
-      setMessage("Failed to load students.");
+      setMessage(`Failed to load students: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -123,18 +142,39 @@ export default function AdminDashboard() {
 
     try {
       setLoading(true);
-      
-      // 1. Create user in Firebase Authentication
       const defaultPassword = "DEST@2024";
-      const credentials = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        defaultPassword
-      );
-      const uid = credentials.user.uid;
+      let uid;
 
-      // 2. Create user document in "users" collection for login
-      await addDoc(collection(db, "users"), {
+      try {
+        // 1. Try to create new user in Firebase Authentication
+        const credentials = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          defaultPassword
+        );
+        uid = credentials.user.uid;
+      } catch (authError) {
+        // If email already exists, check if student documents already exist
+        if (authError.code === "auth/email-already-in-use") {
+          // Check if the student documents already exist
+          const existingUserDoc = await getDoc(doc(db, "users", email));
+          const existingStudentDoc = await getDoc(doc(db, "students", email));
+          
+          if (existingUserDoc.exists() || existingStudentDoc.exists()) {
+            setMessage("This student has already been added to the system.");
+            return;
+          }
+          
+          // If documents don't exist, we need to get the uid of the existing auth account
+          // Since we can't query by email directly, inform the admin
+          setMessage("This email is already registered in the system. Please contact support or use a different email address.");
+          return;
+        }
+        throw authError;
+      }
+
+      // 2. Create user document in "users" collection with uid as document ID
+      await setDoc(doc(db, "users", uid), {
         uid: uid,
         firstName: name.split(' ')[0] || name,
         lastName: name.split(' ').slice(1).join(' ') || name,
@@ -148,8 +188,8 @@ export default function AdminDashboard() {
         createdBy: adminInfo?.email || "admin"
       });
 
-      // 3. Create student document in "students" collection for fee management
-      await addDoc(collection(db, "students"), {
+      // 3. Create student document in "students" collection with uid as document ID for fee management
+      await setDoc(doc(db, "students", uid), {
         uid: uid,
         name,
         email,
